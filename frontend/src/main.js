@@ -221,6 +221,35 @@ const aiBlessings = [
   "好运常伴你左右！",
   "愿你每天都能遇见美好。"
 ];
+// 趣味问答扩展
+const aiRiddles = [
+  "什么东西越洗越脏？——水",
+  "什么动物最怕冷？——熊（因为有熊出没）",
+  "什么东西有头无尾？——针",
+  "什么东西越用越少？——橡皮",
+  "什么东西没脚也能跑？——水流",
+  "什么东西越长越矮？——蜡烛",
+  "什么东西看不见摸不着却能让人流泪？——洋葱的气味",
+  "什么东西越分越少？——秘密",
+  "什么东西越打越小？——气球",
+  "什么东西越吃越饿？——火"
+];
+const aiFacts = [
+  "人的指纹都是独一无二的，就连双胞胎也不一样。",
+  "章鱼有三颗心脏。",
+  "蜂鸟是唯一能倒着飞的鸟。",
+  "世界上最长的地名有85个字母。",
+  "海豚睡觉时会睁一只眼睛。",
+  "猫头鹰的眼睛不能转动，只能转头。",
+  "南极是地球上唯一没有爬行动物的大陆。",
+  "闪电的温度比太阳表面还高。",
+  "蝴蝶用脚尝味道。",
+  "世界上最小的鸟是蜂鸟。"
+];
+// 上下文记忆
+let lastIntent = null;
+let lastIntentKey = null;
+let lastIntentIndex = 0;
 
 // 扩充AI小助手语料和规则
 const aiScenes = {
@@ -546,27 +575,98 @@ const aiScenes = {
   ]
 };
 
+// 支持自定义语料
+function addCustomCorpus(type, text) {
+  if (type === '语录') aiQuotes.push(text);
+  if (type === '祝福') aiBlessings.push(text);
+  if (type === '笑话') aiScenes.joke[1].push(text);
+  if (type === '脑筋急转弯') aiRiddles.push(text);
+  if (type === '冷知识') aiFacts.push(text);
+}
+
 function aiReply(userMsg) {
   const msg = userMsg.trim();
-  if (!msg) return "说说你的想法吧，我一直在~";
+  // 支持自定义语料添加
+  const addMatch = msg.match(/^添加(语录|祝福|笑话|脑筋急转弯|冷知识)：(.{2,})$/);
+  if (addMatch) {
+    addCustomCorpus(addMatch[1], addMatch[2]);
+    return `已添加你的专属${addMatch[1]}！`;
+  }
+  // 趣味问答追问
+  if (/再来一个|换一个|再说一个|再讲一个/.test(msg)) {
+    if (lastIntent === 'joke' && aiScenes.joke[1].length > 0) {
+      lastIntentIndex = (lastIntentIndex + 1) % aiScenes.joke[1].length;
+      return aiScenes.joke[1][lastIntentIndex];
+    }
+    if (lastIntent === 'riddle' && aiRiddles.length > 0) {
+      lastIntentIndex = (lastIntentIndex + 1) % aiRiddles.length;
+      return aiRiddles[lastIntentIndex];
+    }
+    if (lastIntent === 'fact' && aiFacts.length > 0) {
+      lastIntentIndex = (lastIntentIndex + 1) % aiFacts.length;
+      return aiFacts[lastIntentIndex];
+    }
+    return "你想听什么？可以说'讲个笑话'、'来个脑筋急转弯'等。";
+  }
+  // 上下文追问"怎么办""怎么做"
+  if (/怎么办|怎么做|建议|方法|怎么解决/.test(msg) && lastIntentKey) {
+    switch (lastIntentKey) {
+      case 'anxiety':
+        return "可以试试深呼吸、运动、和朋友聊聊，或者写下你的烦恼分解解决。";
+      case 'exam':
+        return "考前复习要有计划，考后及时总结，遇到难题多请教老师同学。";
+      case 'emotion':
+        return "可以听音乐、写日记、和信任的人聊聊，给自己积极心理暗示。";
+      case 'procrastination':
+        return "把任务拆小，设定奖励，和朋友互相监督，试试番茄钟法。";
+      case 'relationship':
+        return "主动沟通、真诚待人、参加集体活动，慢慢建立友谊。";
+      case 'motivation':
+        return "回顾进步、设小目标、适当休息、和朋友互相鼓励。";
+      default:
+        return "可以多尝试不同方法，找到最适合自己的方式。";
+    }
+  }
+  // 趣味问答意图
+  if (/脑筋急转弯|来个脑筋急转弯/.test(msg)) {
+    lastIntent = 'riddle';
+    lastIntentIndex = Math.floor(Math.random()*aiRiddles.length);
+    return aiRiddles[lastIntentIndex];
+  }
+  if (/冷知识|来个冷知识/.test(msg)) {
+    lastIntent = 'fact';
+    lastIntentIndex = Math.floor(Math.random()*aiFacts.length);
+    return aiFacts[lastIntentIndex];
+  }
+  // 其他意图
   for (const key in aiScenes) {
     if (aiScenes[key][0].test(msg)) {
+      lastIntent = key === 'joke' ? 'joke' : null;
+      lastIntentKey = key;
+      if (key === 'joke') {
+        lastIntentIndex = Math.floor(Math.random()*aiScenes.joke[1].length);
+        return aiScenes.joke[1][lastIntentIndex];
+      }
       const arr = aiScenes[key][1];
       return arr[Math.floor(Math.random()*arr.length)];
     }
   }
   // 学习贴士
   if (/学习|方法|效率|记忆/.test(msg)) {
+    lastIntent = null; lastIntentKey = null;
     return aiTips[Math.floor(Math.random()*aiTips.length)];
   }
   // 祝福
   if (/祝福|好运|开心|快乐/.test(msg)) {
+    lastIntent = null; lastIntentKey = null;
     return aiBlessings[Math.floor(Math.random()*aiBlessings.length)];
   }
   // 随机温暖语录
   if (Math.random() < 0.4) {
+    lastIntent = null; lastIntentKey = null;
     return aiQuotes[Math.floor(Math.random()*aiQuotes.length)];
   }
+  lastIntent = null; lastIntentKey = null;
   return "我一直在你身边，有什么都可以和我说哦！";
 }
 
