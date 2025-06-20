@@ -10,7 +10,7 @@ document.querySelector('#app').innerHTML = `
         <div class="tab-header">
           <div class="tab-item" data-tab="main-tab" style="display:none;">Main</div>
           <div class="tab-item" data-tab="crypto-tool-tab" style="display:none;">加密解密工具</div>
-          <div class="tab-item active" data-tab="ai-helper-tab">AI小助手</div>
+          <div class="tab-item active" data-tab="ai-helper-tab">正能量AI小助手</div>
         </div>
         <div class="tab-content">
           <!-- Main Tab Content -->
@@ -85,8 +85,8 @@ document.querySelector('#app').innerHTML = `
           <!-- AI Helper Tab Content -->
           <div id="ai-helper-tab" class="tab-pane">
             <div class="brand-section">
-              <img src="./assets/images/logo-universal.png" alt="AI小助手" style="width:80%;max-width:320px;height:auto;display:block;margin:0 auto 1.2rem auto;border-radius:1.2rem;box-shadow:0 2px 24px #e0e7ef;" />
-              <h1 class="title mb-2">AI小助手</h1>
+              <img src="./assets/images/logo-universal.png" alt="正能量AI小助手" style="width:80%;max-width:320px;height:auto;display:block;margin:0 auto 1.2rem auto;border-radius:1.2rem;box-shadow:0 2px 24px #e0e7ef;" />
+              <h1 class="title mb-2">正能量AI小助手</h1>
               <p class="subtitle mb-4">陪伴你每一天，传递正能量</p>
             </div>
             <div class="main-content">
@@ -108,7 +108,10 @@ document.querySelector('#app').innerHTML = `
       </div>
     </div>
   </div>
-  <div style="position:fixed;left:0;right:0;bottom:2.5vh;z-index:999;text-align:center;font-size:1.25rem;font-weight:bold;color:#888;letter-spacing:0.12em;user-select:none;">吴影非老师作品 侵权必究</div>
+  <div style="position:fixed;left:0;right:0;bottom:1.5vh;z-index:999;text-align:center;user-select:none;pointer-events:none;">
+    <div style="font-size:1.25rem;font-weight:bold;color:#888;letter-spacing:0.12em;margin-bottom:0.5em;">吴影非老师作品 侵权必究</div>
+    <div style="font-size:1.05rem;font-weight:bold;color:#888;letter-spacing:0.10em;">学校信息：颍东区向阳小学</div>
+  </div>
 `;
 
 const mainResultElement = document.getElementById("result-main");
